@@ -3,8 +3,8 @@ configuration: Release
 build_script:
 - ps: >-
 
-    cmake .
+    cmake . -DCMAKE_BUILD_TYPE=${CONFIGURATION}
 
     cmake --build .
 
-    ./bctest.exe
+    ./${CONFIGURATION}/bctest.exe
