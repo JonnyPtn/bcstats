@@ -19,3 +19,6 @@ target_include_directories(bctest PUBLIC include src)
 # Set up CMake to execute tests
 enable_testing()
 add_test(NAME Catch COMMAND bctest)
+
+# Install target
+install(TARGETS bcstats bctest DESTINATION .)

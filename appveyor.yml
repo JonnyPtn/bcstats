@@ -1,10 +1,10 @@
 image: Visual Studio 2017
 configuration: Release
 build_script:
-- ps: >-
+- cmd: >-
 
-    cmake . -DCMAKE_BUILD_TYPE=${CONFIGURATION}
+    cmake . -DCMAKE_INSTALL_PREFIX=.
 
-    cmake --build .
+    cmake --build . --target install
 
-    ./${CONFIGURATION}/bctest.exe
+    bctest.exe
