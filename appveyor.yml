@@ -1,0 +1,10 @@
+image: Visual Studio 2017
+configuration: Release
+build_script:
+- ps: >-
+
+    cmake .
+
+    cmake --build .
+
+    ./bctest.exe
