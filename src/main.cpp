@@ -123,7 +123,7 @@ int main(int argc, const char *argv[])
         << " on " << stats.highest.date << std::endl
 
         << "Lowest price was " << stats.lowest.price
-        << " in " << stats.lowest.date << std::endl
+        << " on " << stats.lowest.date << std::endl
 
         << "Mean price was " << stats.meanPrice << std::endl
 

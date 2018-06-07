@@ -54,15 +54,8 @@ const optional<nlohmann::json> HistorySourceFile::get() const
     {
         std::cout << e.what() << std::endl;
         std::cout << "Error parsing json file, please check file is correct" << std::endl;
-    }
-    
-    if (json.is_null() || json.is_discarded())
-    {
         return {};
     }
-    
-    else
-    {
-        return optional<nlohmann::json>(json);
-    }
+
+    return optional<nlohmann::json>(json);
 }
