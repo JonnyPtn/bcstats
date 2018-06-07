@@ -88,7 +88,13 @@ TEST_CASE("History json is analyzed correctly")
 
     SECTION("Stats are as expected")
     {
-        REQUIRE(false); // TODO: calculate and implement correct stats for sample
+        auto stats = analyzer.analyze();
+        REQUIRE(stats.dataSize == 20);
+        REQUIRE(stats.highest.date ==  "2018-01-06");
+        REQUIRE(stats.highest.price == 17135.8363);
+        REQUIRE(stats.lowest.date ==  "2018-01-17");
+        REQUIRE(stats.lowest.price == 11141.2488);
+        REQUIRE(stats.meanPrice == Approx(13975.165275));
     }
 
     SECTION("Improper json is handled properly")
@@ -109,15 +115,21 @@ TEST_CASE("Get history from http request")
 {   
     SECTION("HTTP request succeeds with valid URI")
     {
-        HistorySourceHTTP source("https://api.coindesk.com/v1/bpi/historical/close.json?start=2018-01-01&end=2018-01-20");
+        HistorySourceHTTP source("api.coindesk.com",
+            "/v1/bpi/historical/close.json?start=2018-01-01&end=2018-01-20");
+
         auto data = source.get();
-        REQUIRE(data == exampleJson);
+        REQUIRE_FALSE(!data);
+        REQUIRE(*data == exampleJson);
     }
 
     SECTION("HTTP request fails with invalid URI")
     {
-        HistorySourceHTTP source("boop");
-        REQUIRE(source.get().empty());
+        HistorySourceHTTP source("http://beep.boop", "queery");
+        REQUIRE_FALSE(!!source.get());
+
+        HistorySourceHTTP source2("apo.beep.boop", "queery");
+        REQUIRE_FALSE(!!source2.get());
     }
 }
 
@@ -130,16 +142,25 @@ TEST_CASE("Get history from file")
     testFile << exampleJson;
     testFile.close();
 
-    SECTION("valid file loads correctly")
+    SECTION("Valid file loads correctly")
     {
         HistorySourceFile source(testFilePath);
         auto data = source.get();
-        REQUIRE(source.get() == exampleJson);
+        REQUIRE(*source.get() == exampleJson);
     }
 
-    SECTION("HTTP request fails with invalid URI")
+    SECTION("Invalid file fails cleanly")
     {
-        HistorySourceHTTP source("boop");
-        REQUIRE(source.get().empty());
+        HistorySourceFile source("");
+        REQUIRE_FALSE(!!source.get());
+    }
+    SECTION("Invalid json fails cleanly")
+    {
+        testFile.open(testFilePath);
+        testFile << "boop";
+        testFile.close();
+
+        HistorySourceFile source(testFilePath);
+        REQUIRE_FALSE(!!source.get());
     }
 }

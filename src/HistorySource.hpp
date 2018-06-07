@@ -26,6 +26,8 @@
 
 #include <json/json.hpp>
 
+#include <experimental/optional>
+
 ////////////////////////////////////////////////////////////////////////////////
 // Base interface class for history sources
 ////////////////////////////////////////////////////////////////////////////////
@@ -34,5 +36,5 @@ class HistorySource
     public:
     
     // Get the json history data
-    virtual const nlohmann::json get() const = 0;
+    virtual const std::experimental::optional<nlohmann::json> get() const = 0;
 };

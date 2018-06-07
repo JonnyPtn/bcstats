@@ -34,6 +34,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 class HistoryAnalyzer final
 {
+    public:
+
     ////////////////////////////////////////////////////////////////////////////
     // Simple data struct to represent a data point
     // 
@@ -43,12 +45,13 @@ class HistoryAnalyzer final
     struct DataPoint
     {
         std::string date;
-        float price;
+        double price;
     };
 
     ////////////////////////////////////////////////////////////////////////////
     // Simple data struct to represent the resulting stats:
     //
+    // - The size of the sample data
     // - Highest price in sample
     // - Lowest price in sample
     // - The mean average price 
@@ -57,14 +60,13 @@ class HistoryAnalyzer final
     ////////////////////////////////////////////////////////////////////////////
     struct Stats
     {
-        DataPoint       highestPrice;
-        DataPoint       lowestPrice;
-        std::uint32_t   meanPrice;
-        std::uint32_t   medianPrice;
-        float           standardDeviation;
+        std::size_t dataSize;
+        DataPoint   highest;
+        DataPoint   lowest;
+        double      meanPrice;
+        double      medianPrice;
+        float       standardDeviation;
     };
-
-    public:
 
     // Get the stored datapoints
     const std::vector<DataPoint>& getDataPoints() const;

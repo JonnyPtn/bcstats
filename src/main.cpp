@@ -22,23 +22,22 @@
 // SOFTWARE.
 ////////////////////////////////////////////////////////////////////////////////
 
+#include <regex>
+
 #include <cxxopts/cxxopts.hpp>
 
 #include "HistorySourceFile.hpp"
 #include "HistorySourceHTTP.hpp"
 #include "HistoryAnalyzer.hpp"
 
-#include <regex>
+using std::operator ""s;
 
-int main(int argc, char *argv[])
+int main(int argc, const char *argv[])
 {
     // Set up the program options
     cxxopts::Options options(argv[0], "A tool for generating stats based on bitcoin price history");
 
     options
-    .allow_unrecognised_options()
-    .show_positional_help()
-    .positional_help("[optional args]")
     .add_options()
     ("h,help", "Show this help")
     ("f,file", "JSON file containing history data to analyze", cxxopts::value<std::string>())
@@ -47,6 +46,7 @@ int main(int argc, char *argv[])
 
     try
     {
+        options.parse_positional("range");
         auto result = options.parse(argc,argv);
         // Help option
         if (result.count("help"))
@@ -64,13 +64,14 @@ int main(int argc, char *argv[])
         else
         {
             // If no file provided, it's an HTTP request
-            std::string URI = "https://api.coindesk.com/v1/bpi/historical/close.json";
+            auto host = "api.coindesk.com"s;
+            auto query = "/v1/bpi/historical/close.json"s;
 
-            // Check for start date param
+            // Check for range date param
             if (result.count("range"))
             {
                 // Validate Dates
-                auto dates = result["range"].as<std::vector<std::string>>();
+                auto& dates = result["range"].as<std::vector<std::string>>();
 
                 if (dates.size() !=2)
                 {
@@ -78,15 +79,23 @@ int main(int argc, char *argv[])
                     return 1;
                 }
 
-                URI.append("&start=" + dates[0]);
-                URI.append("&end=" + dates[1]);
+                // Set query params
+                query.append("?start=" + dates[0]);
+                query.append("&end=" + dates[1]);
             }
-            source = std::make_unique<HistorySourceHTTP>(URI);
+            source = std::make_unique<HistorySourceHTTP>(host, query);
         }
 
         auto data = source->get();
+
+        if (!data)
+        {
+            std::cout << "Failed to get source data" << std::endl;
+            return 1;
+        }
+
         HistoryAnalyzer analyzer;
-        analyzer.parse(data);
+        analyzer.parse(*data);
 
         // If verbose output, spit out the raw data
         if (result.count("verbose"))
@@ -99,12 +108,15 @@ int main(int argc, char *argv[])
         }
         // Output stats
         auto stats = analyzer.analyze();
-        std::cout << "Stats for data:" 
-        << "Highest price was " << stats.highestPrice.price 
-        << " on " << stats.highestPrice.date << std::endl
+        std::cout << "Stats for data:" << std::endl
 
-        << "Lowest price was " << stats.lowestPrice.price
-        << " in " << stats.lowestPrice.date << std::endl
+        << "Total samples: " << stats.dataSize << std::endl
+
+        << "Highest price was " << stats.highest.price 
+        << " on " << stats.highest.date << std::endl
+
+        << "Lowest price was " << stats.lowest.price
+        << " in " << stats.lowest.date << std::endl
 
         << "Mean price was " << stats.meanPrice << std::endl
 

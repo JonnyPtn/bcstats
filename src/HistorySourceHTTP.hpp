@@ -32,10 +32,11 @@
 class HistorySourceHTTP final : public HistorySource
 {
     public:
-    HistorySourceHTTP(const std::string& URI);
+    HistorySourceHTTP(const std::string& host, const std::string& query);
 
-    const nlohmann::json get() const override;
+    const std::experimental::optional<nlohmann::json> get() const override;
 
     private:
-    const std::string& m_URI;
+    const std::string& m_host;
+    const std::string& m_query;
 };

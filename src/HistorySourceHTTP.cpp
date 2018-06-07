@@ -22,15 +22,52 @@
 // SOFTWARE.
 ////////////////////////////////////////////////////////////////////////////////
 
+#include <iostream>
+
 #include "HistorySourceHTTP.hpp"
 
-////////////////////////////////////////////////////////////////////////////////
-HistorySourceHTTP::HistorySourceHTTP(const std::string& URI) :
-HistorySource(),
-m_URI(URI) {}
+#include <http/httplib.hpp>
 
 ////////////////////////////////////////////////////////////////////////////////
-const nlohmann::json HistorySourceHTTP::get() const
+HistorySourceHTTP::HistorySourceHTTP(const std::string& host, const std::string& query) :
+HistorySource(),
+m_host(host),
+m_query(query) {}
+
+////////////////////////////////////////////////////////////////////////////////
+const std::experimental::optional<nlohmann::json> HistorySourceHTTP::get() const
 {
-    return {};
+    // Make the http request
+    httplib::Client client(m_host.c_str(), 80);
+
+    auto res = client.Get(m_query.c_str());
+
+    nlohmann::json json;
+
+    if (res && res->status == 200)
+    {
+        try
+        {
+            json = nlohmann::json::parse(res->body);
+        }
+        catch (nlohmann::json::exception e)
+        {
+            std::cout << e.what() << std::endl;
+            std::cout << "HTTP returned " << res->body << std::endl;
+        }
+        return json;
+    }
+    else
+    {
+        if (res)
+        {
+            std::cout << "HTTP Error: " << res->status << " " << res->body << std::endl;
+        }
+        else
+        {
+            std::cout << "Bad HTTP request" << std::endl;
+        }
+        return std::experimental::nullopt;
+    }
+    
 }
