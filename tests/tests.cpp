@@ -151,7 +151,7 @@ TEST_CASE("Get history from file")
 
     SECTION("Invalid file fails cleanly")
     {
-        HistorySourceFile source("");
+        HistorySourceFile source("boop");
         REQUIRE_FALSE(!!source.get());
     }
     SECTION("Invalid json fails cleanly")

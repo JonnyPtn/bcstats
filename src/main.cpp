@@ -38,11 +38,12 @@ int main(int argc, const char *argv[])
     cxxopts::Options options(argv[0], "A tool for generating stats based on bitcoin price history");
 
     options
+    .show_positional_help()
     .add_options()
     ("h,help", "Show this help")
+    ("v,verbose", "Verbose output")
     ("f,file", "JSON file containing history data to analyze", cxxopts::value<std::string>())
-    ("r,range", "Date range to analyze data for [FROM TO] (YYYY-MM-DD)", cxxopts::value<std::vector<std::string>>()) 
-    ("v,verbose", "Verbose output");
+    ("r,range", "Date range to analyze data for [FROM TO] (YYYY-MM-DD)", cxxopts::value<std::vector<std::string>>()) ;
 
     try
     {
@@ -52,6 +53,7 @@ int main(int argc, const char *argv[])
         if (result.count("help"))
         {
             std::cout << options.help();
+            return 0;
         }
 
         // Determine which source to use
@@ -82,6 +84,11 @@ int main(int argc, const char *argv[])
                 // Set query params
                 query.append("?start=" + dates[0]);
                 query.append("&end=" + dates[1]);
+            }
+            else
+            {
+                // No range provided, API will return previous 31 days by default
+                std::cout << "Using data from previous 31 days" << std::endl;
             }
             source = std::make_unique<HistorySourceHTTP>(host, query);
         }

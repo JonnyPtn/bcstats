@@ -35,7 +35,7 @@ m_host(host),
 m_query(query) {}
 
 ////////////////////////////////////////////////////////////////////////////////
-const std::experimental::optional<nlohmann::json> HistorySourceHTTP::get() const
+const optional<nlohmann::json> HistorySourceHTTP::get() const
 {
     // Make the http request
     httplib::Client client(m_host.c_str(), 80);
@@ -67,7 +67,7 @@ const std::experimental::optional<nlohmann::json> HistorySourceHTTP::get() const
         {
             std::cout << "Bad HTTP request" << std::endl;
         }
-        return std::experimental::nullopt;
+        return {};
     }
     
 }

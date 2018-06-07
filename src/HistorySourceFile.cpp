@@ -33,7 +33,7 @@ HistorySource(),
 m_filePath(path){}
 
 ////////////////////////////////////////////////////////////////////////////////
-const std::experimental::optional<nlohmann::json> HistorySourceFile::get() const
+const optional<nlohmann::json> HistorySourceFile::get() const
 {
     // Open file
     std::ifstream file(m_filePath);
@@ -41,7 +41,7 @@ const std::experimental::optional<nlohmann::json> HistorySourceFile::get() const
     if (!file.good() || !file.is_open())
     {
         std::cout << "Failed to open file at " + m_filePath << std::endl;
-        return std::experimental::nullopt;
+        return {};
     }
 
     // Try to parse json
@@ -56,6 +56,13 @@ const std::experimental::optional<nlohmann::json> HistorySourceFile::get() const
         std::cout << "Error parsing json file, please check file is correct" << std::endl;
     }
     
-    return json.is_null() || json.is_discarded() ? std::experimental::nullopt : 
-                            std::experimental::optional<nlohmann::json>(json);
+    if (json.is_null() || json.is_discarded())
+    {
+        return {};
+    }
+    
+    else
+    {
+        return optional<nlohmann::json>(json);
+    }
 }

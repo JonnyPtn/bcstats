@@ -26,7 +26,16 @@
 
 #include <json/json.hpp>
 
-#include <experimental/optional>
+// Windows doesn't use experimental, so use correct include and create an alias
+#if defined(WIN32)
+    #include <optional>
+    template<class T>
+    using optional = std::optional<T>;
+#else
+    #include <experimental/optional>
+    template<class T>
+    using optional = std::experimental::optional<T>;
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 // Base interface class for history sources
@@ -36,5 +45,5 @@ class HistorySource
     public:
     
     // Get the json history data
-    virtual const std::experimental::optional<nlohmann::json> get() const = 0;
+    virtual const optional<nlohmann::json> get() const = 0;
 };
