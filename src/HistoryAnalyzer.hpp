@@ -65,7 +65,7 @@ class HistoryAnalyzer final
         DataPoint   lowest;
         double      meanPrice;
         double      medianPrice;
-        float       standardDeviation;
+        double      standardDeviation;
     };
 
     // Get the stored datapoints

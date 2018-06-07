@@ -447,7 +447,7 @@ namespace cxxopts
     namespace
     {
       std::basic_regex<char> integer_pattern
-        ("(-)?(0x)?([0-9a-zA-Z]+)|((0x)?0)");
+        ("(-)?(0x)?([1-9a-zA-Z][0-9a-zA-Z]*)|((0x)?0)");
       std::basic_regex<char> truthy_pattern
         ("(t|T)(rue)?");
       std::basic_regex<char> falsy_pattern
@@ -547,7 +547,7 @@ namespace cxxopts
 
       for (auto iter = value_match.first; iter != value_match.second; ++iter)
       {
-        US digit = 0;
+        size_t digit = 0;
 
         if (*iter >= '0' && *iter <= '9')
         {
@@ -1095,8 +1095,7 @@ namespace cxxopts
     ParseResult(
       const std::unordered_map<std::string, std::shared_ptr<OptionDetails>>&,
       std::vector<std::string>,
-      bool allow_unrecognised,
-      int&, char**&);
+      int&, const char**&);
 
     size_t
     count(const std::string& o) const
@@ -1139,7 +1138,7 @@ namespace cxxopts
     get_option(std::shared_ptr<OptionDetails>);
 
     void
-    parse(int& argc, char**& argv);
+    parse(int& argc, const char**& argv);
 
     void
     add_to_option(const std::string& option, const std::string& arg);
@@ -1162,7 +1161,7 @@ namespace cxxopts
     checked_parse_arg
     (
       int argc,
-      char* argv[],
+      const char* argv[],
       int& current,
       std::shared_ptr<OptionDetails> value,
       const std::string& name
@@ -1174,8 +1173,6 @@ namespace cxxopts
     std::vector<std::string>::iterator m_next_positional;
     std::unordered_set<std::string> m_positional_set;
     std::unordered_map<std::shared_ptr<OptionDetails>, OptionValue> m_results;
-
-    bool m_allow_unrecognised;
 
     std::vector<KeyValue> m_sequential;
   };
@@ -1190,7 +1187,6 @@ namespace cxxopts
     , m_custom_help("[OPTION...]")
     , m_positional_help("positional parameters")
     , m_show_positional(false)
-    , m_allow_unrecognised(false)
     , m_next_positional(m_positional.end())
     {
     }
@@ -1216,15 +1212,8 @@ namespace cxxopts
       return *this;
     }
 
-    Options&
-    allow_unrecognised_options()
-    {
-      m_allow_unrecognised = true;
-      return *this;
-    }
-
     ParseResult
-    parse(int& argc, char**& argv);
+    parse(int& argc, const char**& argv);
 
     OptionAdder
     add_options(std::string group = "");
@@ -1286,7 +1275,6 @@ namespace cxxopts
     std::string m_custom_help;
     std::string m_positional_help;
     bool m_show_positional;
-    bool m_allow_unrecognised;
 
     std::unordered_map<std::string, std::shared_ptr<OptionDetails>> m_options;
     std::vector<std::string> m_positional;
@@ -1443,13 +1431,11 @@ ParseResult::ParseResult
 (
   const std::unordered_map<std::string, std::shared_ptr<OptionDetails>>& options,
   std::vector<std::string> positional,
-  bool allow_unrecognised,
-  int& argc, char**& argv
+  int& argc, const char**& argv
 )
 : m_options(options)
 , m_positional(std::move(positional))
 , m_next_positional(m_positional.begin())
-, m_allow_unrecognised(allow_unrecognised)
 {
   parse(argc, argv);
 }
@@ -1546,7 +1532,7 @@ void
 ParseResult::checked_parse_arg
 (
   int argc,
-  char* argv[],
+  const char* argv[],
   int& current,
   std::shared_ptr<OptionDetails> value,
   const std::string& name
@@ -1653,15 +1639,15 @@ Options::parse_positional(std::initializer_list<std::string> options)
 
 inline
 ParseResult
-Options::parse(int& argc, char**& argv)
+Options::parse(int& argc, const char**& argv)
 {
-  ParseResult result(m_options, m_positional, m_allow_unrecognised, argc, argv);
+  ParseResult result(m_options, m_positional, argc, argv);
   return result;
 }
 
 inline
 void
-ParseResult::parse(int& argc, char**& argv)
+ParseResult::parse(int& argc, const char**& argv)
 {
   int current = 1;
 
@@ -1711,15 +1697,7 @@ ParseResult::parse(int& argc, char**& argv)
 
           if (iter == m_options.end())
           {
-            if (m_allow_unrecognised)
-            {
-              continue;
-            }
-            else
-            {
-              //error
-              throw option_not_exists_exception(name);
-            }
+            throw option_not_exists_exception(name);
           }
 
           auto value = iter->second;
@@ -1748,19 +1726,7 @@ ParseResult::parse(int& argc, char**& argv)
 
         if (iter == m_options.end())
         {
-          if (m_allow_unrecognised)
-          {
-            // keep unrecognised options in argument list, skip to next argument
-            argv[nextKeep] = argv[current];
-            ++nextKeep;
-            ++current;
-            continue;
-          }
-          else
-          {
-            //error
-            throw option_not_exists_exception(name);
-          }
+          throw option_not_exists_exception(name);
         }
 
         auto opt = iter->second;
