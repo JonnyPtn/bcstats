@@ -16,6 +16,12 @@ target_include_directories(bcstats PUBLIC include)
 add_executable(bctest tests/tests.cpp ${PROJECT_SRC})
 target_include_directories(bctest PUBLIC include src)
 
+# On windows, need to link network lib
+if (WIN32)
+    target_link_libraries(bcstats Ws2_32.lib)
+    target_link_libraries(bctest Ws2_32.lib)
+endif()
+
 # Set up CMake to execute tests
 enable_testing()
 add_test(NAME Catch COMMAND bctest)
