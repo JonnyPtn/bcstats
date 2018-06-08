@@ -119,17 +119,17 @@ int main(int argc, const char *argv[])
 
         << "Total samples: " << stats.dataSize << std::endl
 
-        << "Highest price was " << stats.highest.price 
+        << "Highest price was $" << stats.highest.price 
         << " on " << stats.highest.date << std::endl
 
-        << "Lowest price was " << stats.lowest.price
+        << "Lowest price was $" << stats.lowest.price
         << " on " << stats.lowest.date << std::endl
 
-        << "Mean price was " << stats.meanPrice << std::endl
+        << "Mean price was $" << stats.meanPrice << std::endl
 
-        << "Median price was " << stats.medianPrice << std::endl
+        << "Median price was $" << stats.medianPrice << std::endl
 
-        << "Standard deviation of " << stats.standardDeviation << std::endl;
+        << "Standard deviation of $" << stats.standardDeviation << std::endl;
     }
     catch(cxxopts::OptionException& e)
     {

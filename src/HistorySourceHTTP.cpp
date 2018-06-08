@@ -54,6 +54,7 @@ const optional<nlohmann::json> HistorySourceHTTP::get() const
         {
             std::cout << e.what() << std::endl;
             std::cout << "HTTP returned " << res->body << std::endl;
+            return {};
         }
         return json;
     }
