@@ -37,5 +37,5 @@ class HistorySourceFile final : public HistorySource
     const optional<nlohmann::json> get() const override;
 
     private:
-    const std::string& m_filePath;
+    const std::string m_filePath;
 };
