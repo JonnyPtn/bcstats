@@ -119,17 +119,17 @@ TEST_CASE("Get history from http request")
             "/v1/bpi/historical/close.json?start=2018-01-01&end=2018-01-20");
 
         auto data = source.get();
-        REQUIRE_FALSE(!data);
+        REQUIRE(static_cast<bool>(data));
         REQUIRE(*data == exampleJson);
     }
 
     SECTION("HTTP request fails with invalid URI")
     {
         HistorySourceHTTP source("http://beep.boop", "queery");
-        REQUIRE_FALSE(!!source.get());
+        REQUIRE_FALSE(static_cast<bool>(source.get()));
 
         HistorySourceHTTP source2("apo.beep.boop", "queery");
-        REQUIRE_FALSE(!!source2.get());
+        REQUIRE_FALSE(static_cast<bool>(source2.get()));
     }
 }
 
@@ -146,13 +146,14 @@ TEST_CASE("Get history from file")
     {
         HistorySourceFile source(testFilePath);
         auto data = source.get();
-        REQUIRE(*source.get() == exampleJson);
+        REQUIRE(static_cast<bool>(data));
+        REQUIRE(*data == exampleJson);
     }
 
     SECTION("Invalid file fails cleanly")
     {
         HistorySourceFile source("boop");
-        REQUIRE_FALSE(!!source.get());
+        REQUIRE_FALSE(static_cast<bool>(source.get()));
     }
     SECTION("Invalid json fails cleanly")
     {
@@ -161,6 +162,6 @@ TEST_CASE("Get history from file")
         testFile.close();
 
         HistorySourceFile source(testFilePath);
-        REQUIRE_FALSE(!!source.get());
+        REQUIRE_FALSE(static_cast<bool>(source.get()));
     }
 }
